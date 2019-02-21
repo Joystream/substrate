@@ -17,7 +17,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::{io, thread};
-use log::{warn, debug, error, trace};
+use log::{warn, debug, error, trace, info};
 use futures::{Async, Future, Stream, stream, sync::oneshot};
 use parking_lot::Mutex;
 use network_libp2p::{ProtocolId, PeerId, NetworkConfiguration, NodeIndex, ErrorKind, Severity};
