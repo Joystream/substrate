@@ -92,6 +92,9 @@ impl<T: Trait> ChargeFee<T::AccountId> for Module<T> {
 	type Amount = AssetOf<T>;
 
 	fn charge_fee(transactor: &T::AccountId, amount: AssetOf<T>) -> Result {
+		if amount.is_zero() {
+			return Ok(());
+		}
 		let extrinsic_index = <system::Module<T>>::extrinsic_index().ok_or_else(|| "no extrinsic index found")?;
 		let current_fee = Self::current_transaction_fee(extrinsic_index);
 		let new_fee = current_fee.checked_add(&amount).ok_or_else(|| "fee got overflow after charge")?;
@@ -103,6 +106,9 @@ impl<T: Trait> ChargeFee<T::AccountId> for Module<T> {
 	}
 
 	fn refund_fee(transactor: &T::AccountId, amount: AssetOf<T>) -> Result {
+		if amount.is_zero() {
+			return Ok(());
+		}
 		let extrinsic_index = <system::Module<T>>::extrinsic_index().ok_or_else(|| "no extrinsic index found")?;
 		let current_fee = Self::current_transaction_fee(extrinsic_index);
 		let new_fee = current_fee.checked_sub(&amount).ok_or_else(|| "fee got underflow after refund")?;
