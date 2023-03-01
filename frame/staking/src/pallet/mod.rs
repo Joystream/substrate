@@ -44,7 +44,7 @@ mod impls;
 pub use impls::*;
 
 use crate::{
-	slashing, weights::WeightInfo, AccountIdLookupOf, ActiveEraInfo, BalanceOf, EraPayout,
+	slashing, weights::WeightInfo, AccountIdLookupOf, ActiveEraInfo, BalanceOf, BondingRestriction, EraPayout,
 	EraRewardPoints, Exposure, Forcing, NegativeImbalanceOf, Nominations, PositiveImbalanceOf,
 	RewardDestination, SessionInterface, StakingLedger, UnappliedSlash, UnlockChunk,
 	ValidatorPrefs,
@@ -270,6 +270,9 @@ pub mod pallet {
 
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
+
+		/// Interface for doing bonding restriction check
+		type BondingRestriction: BondingRestriction<Self::AccountId>;
 	}
 
 	/// The ideal number of active validators.
@@ -773,6 +776,8 @@ pub mod pallet {
 		CommissionTooLow,
 		/// Some bound is not met.
 		BoundNotMet,
+		/// External restriction prevents bonding with given account
+		BondingRestricted,
 	}
 
 	#[pallet::hooks]
@@ -864,6 +869,10 @@ pub mod pallet {
 
 			if <Ledger<T>>::contains_key(&controller) {
 				return Err(Error::<T>::AlreadyPaired.into())
+			}
+
+			if !T::BondingRestriction::can_bond(&stash) {
+				return Err(Error::<T>::BondingRestricted.into())
 			}
 
 			// Reject a bond which is considered to be _dust_.
