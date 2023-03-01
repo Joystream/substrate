@@ -39,6 +39,7 @@ use sp_staking::offence::{DisableStrategy, OffenceDetails, OnOffenceHandler};
 
 pub const INIT_TIMESTAMP: u64 = 30_000;
 pub const BLOCK_TIME: u64 = 1000;
+pub const RESTRICTED_ACCOUNT: AccountId = 55500;
 
 /// The AccountId alias in this test module.
 pub(crate) type AccountId = u64;
@@ -304,6 +305,7 @@ impl crate::pallet::pallet::Config for Test {
 	type OnStakerSlash = OnStakerSlashMock<Test>;
 	type BenchmarkingConfig = TestBenchmarkingConfig;
 	type WeightInfo = ();
+	type BondingRestriction = AccountRestricted555;
 }
 
 pub(crate) type StakingCall = crate::Call<Test>;
@@ -810,4 +812,13 @@ pub(crate) fn staking_events_since_last_call() -> Vec<crate::Event<Test>> {
 
 pub(crate) fn balances(who: &AccountId) -> (Balance, Balance) {
 	(Balances::free_balance(who), Balances::reserved_balance(who))
+}
+
+pub struct AccountRestricted555;
+
+// Restrict stash account
+impl BondingRestriction<AccountId> for AccountRestricted555 {
+	fn can_bond(stash: &AccountId) -> bool {
+		*stash != RESTRICTED_ACCOUNT
+	}
 }
