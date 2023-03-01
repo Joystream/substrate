@@ -137,6 +137,7 @@ impl pallet_staking::Config for Runtime {
 	type OnStakerSlash = Pools;
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type WeightInfo = ();
+	type BondingRestriction = ();
 }
 
 parameter_types! {

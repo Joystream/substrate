@@ -20,7 +20,7 @@
 use super::{ConfigOp, Event, *};
 use frame_election_provider_support::{ElectionProvider, SortedListProvider, Support};
 use frame_support::{
-	assert_noop, assert_ok, assert_storage_noop, bounded_vec,
+	assert_err, assert_noop, assert_ok, assert_storage_noop, bounded_vec,
 	dispatch::{extract_actual_weight, GetDispatchInfo, WithPostDispatchInfo},
 	pallet_prelude::*,
 	traits::{Currency, Get, ReservableCurrency},
@@ -5847,4 +5847,31 @@ mod staking_interface {
 			assert!(Staking::status(&42).is_err());
 		})
 	}
+}
+
+#[test]
+fn bond_restriction_works() {
+	ExtBuilder::default().build_and_execute(|| {
+		start_session(2);
+		assert_err!(
+			Staking::bond(
+				RuntimeOrigin::signed(RESTRICTED_ACCOUNT),
+				1,
+				1000,
+				RewardDestination::Controller
+			),
+			Error::<Test>::BondingRestricted
+		);
+
+		// put some money in account that we'll use.
+		let _ = Balances::make_free_balance_be(&(RESTRICTED_ACCOUNT + 1), 2000);
+
+		// Using unrestricted account should not fail
+		assert_ok!(Staking::bond(
+			RuntimeOrigin::signed(RESTRICTED_ACCOUNT + 1),
+			1,
+			1000,
+			RewardDestination::Controller
+		));
+	});
 }

@@ -160,6 +160,7 @@ impl pallet_staking::Config for Runtime {
 	type OnStakerSlash = ();
 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
 	type WeightInfo = ();
+	type BondingRestriction = ();
 }
 
 pub struct BalanceToU256;
