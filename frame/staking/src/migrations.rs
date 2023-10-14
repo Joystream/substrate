@@ -209,7 +209,6 @@ pub mod v11 {
 				}
 
 				move_pallet(old_pallet_name.as_bytes(), new_pallet_name.as_bytes());
-				clear_prefix(&twox_128(old_pallet_name.as_bytes()), None, None);
 				<T as frame_system::Config>::BlockWeights::get().max_block
 			} else {
 				log!(warn, "v11::migrate should be removed.");
@@ -232,11 +231,14 @@ pub mod v11 {
 				return Ok(())
 			}
 
-			let old_pallet_prefix = twox_128(N::get().as_bytes());
-			frame_support::ensure!(
-				sp_io::storage::next_key(&old_pallet_prefix).is_none(),
-				"old pallet data hasn't been removed"
-			);
+			// https://substrate-developer-hub.github.io/rustdocs/latest/frame_support/storage/migration/fn.move_pallet.html
+			// "The value at the key twox_128(old_pallet_name) is not moved."
+			// So this assertion seems incorrect!
+			// let old_pallet_prefix = twox_128(N::get().as_bytes());
+			// frame_support::ensure!(
+			// 	sp_io::storage::next_key(&old_pallet_prefix).is_none(),
+			// 	"old pallet data hasn't been removed"
+			// );
 
 			let new_pallet_name = <P as PalletInfoAccess>::name();
 			let new_pallet_prefix = twox_128(new_pallet_name.as_bytes());
