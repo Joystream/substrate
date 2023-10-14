@@ -159,7 +159,7 @@ pub mod v12 {
 pub mod v11 {
 	use super::*;
 	use frame_support::{
-		storage::migration::move_pallet,
+		storage::{unhashed::clear_prefix, migration::move_pallet},
 		traits::{GetStorageVersion, PalletInfoAccess},
 	};
 	#[cfg(feature = "try-runtime")]
@@ -209,6 +209,7 @@ pub mod v11 {
 				}
 
 				move_pallet(old_pallet_name.as_bytes(), new_pallet_name.as_bytes());
+				clear_prefix(&twox_128(old_pallet_name.as_bytes()), None, None);
 				<T as frame_system::Config>::BlockWeights::get().max_block
 			} else {
 				log!(warn, "v11::migrate should be removed.");
